@@ -1,0 +1,76 @@
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="stylesheet" href="index.css">
+        <title>Personal Dashboard</title>
+    </head>
+    <body>
+        <main>
+            <div class="layout-col left-col">
+                <section>
+                    <h1 class="app-title">Personal Dashboard</h1>
+                </section>
+                <section id="most-frequent-websites-section">
+                    <h2 class="section-heading">Top 10 Recently Frequently Visited Websites</h2>
+                    <ol id="frequent-websites-container">
+
+                    </ol>
+                </section>
+            </div>  
+            <div class="layout-col mid-col">
+                <section id="moon-section">
+                    <div class="moon-container">
+                        <div class="moon-light" id="moon-light"></div>
+                        <div class="moon-shadow" id="moon-shadow"></div>
+                    </div>
+                    <p>Moon illumination: <span id="illumination"></span></p>
+                    <p>Moon phase: <span id="current-phase"></span></p>
+                </section>
+                <section class="time-container">
+                    <h2 id="time-text"></h2>
+                </section>
+                <section class="current-location-section">
+                    <header>
+                        <h2 id="current-location-heading" class="section-heading">Enter your ZIP code:</h2>
+                        <span id="current-location-result"></span>
+                    </header>
+                    <form id="zip-code-form">
+                        <label for="zipcode">ZIP Code:</label>
+                        <input type="text" id="zipcode-input" name="zipcode" pattern="\d{5}" maxlength="5" inputmode="numeric" required>
+                        <button type="submit">Submit</button>
+                    </form>
+                </section>
+            </div>
+            <div class="layout-col right-col">
+                <section id="weather-section">
+                    <header>
+                        <h2 class="section-heading">Weather</h2>
+                        <form>
+                            <fieldset class="forecast-time-radios">
+                                <legend>Time of day:</legend>
+                                <label>
+                                    <input type="radio" name="forecast-time" value="day" checked>
+                                    Day ☀️
+                                </label>
+                                <label>
+                                    <input type="radio" name="forecast-time" value="night">
+                                    Night 🌙
+                                </label>
+                            </fieldset>
+                        </form>
+                    </header>
+                    <div id="forecast-container">
+                        <h3>Current Forecast</h3>
+                        <div id="current-forecast-container">
+                        </div>
+                        <h3>Future Forecast</h3>
+                        <div id="future-forecast-container">
+                        </div>
+                    </div>
+                    <p id="weather-last-updated"></p>
+                </section>
+            </div>
+        </main>
+        <script src="index.js"></script>
+    </body>
+</html>
