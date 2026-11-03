@@ -116,24 +116,46 @@ function setupForecastTimeToggle() {
     })
 }
 
+function showWeatherError(err) {
+    console.error("Error loading weather", err)
+
+    document.getElementById("current-forecast-container").innerHTML =
+        "<p>Couldn't load the weather right now. Try a new tab in a few minutes.</p>"
+    
+    document.getElementById("future-forecast-container").innerHTML = ""
+    document.getElementById("future-forecast-heading").style.display = "none"
+
+    document.getElementById("weather-last-updated").innerText = ""
+}
+
 function getCurrentLocationWeatherProperties(latitude, longitude) {
     fetch(`https://api.weather.gov/points/${latitude},${longitude}`)
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error(`Couldn't look up the forecast area for this location (status ${res.status})`)
+            return res.json()
+        })
         .then(data => {
             currentForecastUrl = data.properties.forecast
             get7DayWeatherForecast(currentForecastUrl)
         })
+        .catch(err => showWeatherError(err))
 }
 
 function get7DayWeatherForecast(forecastUrl) {
     fetch(forecastUrl)
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error(`Couldn't load the forecast (status ${res.status})`)
+            return res.json()
+        })
         .then(data => {
             // If the ZIP changed while this request was in flight, a newer
             // forecast is on its way. Skip this old one so it can't overwrite it.
             if (forecastUrl !== currentForecastUrl) return
 
             render7DayWeatherForecast(data.properties, forecastTimeOfDay)
+        })
+        .catch(err => {
+            if (forecastUrl === currentForecastUrl) showWeatherError(err)
         })
 }
 
@@ -147,10 +169,10 @@ function render7DayWeatherForecast(forecast, forecastTimeOfDay) {
         .filter(period => forecastTimeOfDay === "day" ? period.isDaytime : !period.isDaytime)
         .slice(0, 6) // Limit to 6 future periods
 
-    document.getElementById("future-forecast-heading").innerText = forecastTimeOfDay === "day" ? "Next 6 Days" : "Next 6 Nights"
-
     document.getElementById("current-forecast-container").innerHTML = renderWeatherPeriod(current)
 
+    document.getElementById("future-forecast-heading").style.display = ""
+    document.getElementById("future-forecast-heading").innerText = forecastTimeOfDay === "day" ? "Next 6 Days" : "Next 6 Nights"
     document.getElementById("future-forecast-container").innerHTML = displayedForecast.map(period => renderWeatherPeriod(period)).join('')
 
     function renderWeatherPeriod(period) {
