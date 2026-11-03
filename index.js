@@ -40,7 +40,7 @@ function handleZipCodeInput(e) {
     
     const zipCodeInput = document.getElementById("zipcode-input")
     const zipCode = zipCodeInput.value
-    zipCode.value = ""
+    zipCodeInput.value = ""
     getZipCodeProperties(zipCode)
 }
 
