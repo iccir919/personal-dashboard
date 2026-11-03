@@ -1,5 +1,3 @@
-
-
 // Background image
 
 function getRandomBackground() {
@@ -100,34 +98,43 @@ function getCurrentTime() {
 
 // Weather section
 
-function getCurrentLocationWeatherProperties(latitude, longitude) {
-    let forecastTimeOfDay = "day"
+// Shared weather state. The Day/Night toggle and the ZIP form both read
+// and update these, so there is only ever one "current" forecast.
+let currentForecastUrl = null
+let forecastTimeOfDay = "day"
 
+// Runs once at startup. Attaching the listener here (instead of every time
+// a forecast loads) means each toggle click triggers exactly one fetch.
+function setupForecastTimeToggle() {
+    const forecastTimeRadios = document.querySelectorAll("input[name='forecast-time']")
+
+    forecastTimeRadios.forEach(radio => {
+        radio.addEventListener("change", () => {
+            forecastTimeOfDay = radio.value
+            if (currentForecastUrl) get7DayWeatherForecast(currentForecastUrl)
+        })
+    })
+}
+
+function getCurrentLocationWeatherProperties(latitude, longitude) {
     fetch(`https://api.weather.gov/points/${latitude},${longitude}`)
         .then(res => res.json())
         .then(data => {
-            const forecastUrl = data.properties.forecast
-            get7DayWeatherForecast(forecastUrl, forecastTimeOfDay)    
-            
-            const forecastTimeRadios = document.querySelectorAll("input[name='forecast-time']")
-
-            forecastTimeRadios.forEach(radio => {
-                radio.addEventListener('change', () => {
-                    if (radio.checked) forecastTimeOfDay = radio.value
-                    get7DayWeatherForecast(forecastUrl, forecastTimeOfDay)
-                })
-            })
+            currentForecastUrl = data.properties.forecast
+            get7DayWeatherForecast(currentForecastUrl)
         })
 }
 
-function get7DayWeatherForecast(forecastUrl, forecastTimeOfDay) {
-
+function get7DayWeatherForecast(forecastUrl) {
     fetch(forecastUrl)
         .then(res => res.json())
         .then(data => {
+            // If the ZIP changed while this request was in flight, a newer
+            // forecast is on its way. Skip this old one so it can't overwrite it.
+            if (forecastUrl !== currentForecastUrl) return
+
             render7DayWeatherForecast(data.properties, forecastTimeOfDay)
         })
-
 }
 
 function render7DayWeatherForecast(forecast, forecastTimeOfDay) {
@@ -154,15 +161,6 @@ function render7DayWeatherForecast(forecast, forecastTimeOfDay) {
             </div>
         `
     }
-
-    const forecastTimeRadios = document.querySelectorAll("input[name='forecast-time']")
-
-    forecastTimeRadios.forEach(radio => {
-        radio.addEventListener('change', () => {
-            if (radio.checked) forecastTimePeriod = radio.value
-        })
-    })
-    
 }
 
 // Most frequently visited websites
@@ -316,6 +314,7 @@ function updateMoonPhase(illumination, curPhase) {
 // Initialization
 
 function initDashboard() {
+    setupForecastTimeToggle()
     getLocationFromLocalStorage()
     getBrowsingHistory()
     getRandomBackground()
@@ -323,6 +322,3 @@ function initDashboard() {
 }
 
 initDashboard()
-
-
-
