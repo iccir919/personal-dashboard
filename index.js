@@ -140,13 +140,14 @@ function get7DayWeatherForecast(forecastUrl) {
 function render7DayWeatherForecast(forecast, forecastTimeOfDay) {
     const forecastGenerationDatetime = new Date(forecast.generatedAt)
 
-    document.getElementById("weather-last-updated").innerText = `
-        Forecast generated: ${forecastGenerationDatetime.toLocaleDateString()} at ${forecastGenerationDatetime.toLocaleTimeString()}
-    `
+    document.getElementById("weather-last-updated").innerText = `Forecast generated: ${forecastGenerationDatetime.toLocaleDateString()} at ${forecastGenerationDatetime.toLocaleTimeString()}`
 
     const [current, ...rest] = forecast.periods
-    const displayedForecast = [...rest.filter(period => forecastTimeOfDay === "day" ? period.isDaytime : !period.isDaytime )]
-    if (forecastTimeOfDay === "night") displayedForecast.pop()
+    const displayedForecast = rest
+        .filter(period => forecastTimeOfDay === "day" ? period.isDaytime : !period.isDaytime)
+        .slice(0, 6) // Limit to 6 future periods
+
+    document.getElementById("future-forecast-heading").innerText = forecastTimeOfDay === "day" ? "Next 6 Days" : "Next 6 Nights"
 
     document.getElementById("current-forecast-container").innerHTML = renderWeatherPeriod(current)
 
@@ -157,7 +158,7 @@ function render7DayWeatherForecast(forecast, forecastTimeOfDay) {
             <div class="weather-period-container">
                 <img class="weather-period-icon" src="${period.icon}" />
                 <h4 class="weather-period-name">${period.name}</h4>
-                <p class="weather-period-temperature-text">${period.temperature}</p>
+                <p class="weather-period-temperature-text">${period.temperature}°${period.temperatureUnit}</p>
             </div>
         `
     }
