@@ -198,16 +198,16 @@ function getBrowsingHistory() {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(today.getDate() - 7)
 
-    chrome.history.search({ text: "",  maxResults: 500, startTime: sevenDaysAgo.getTime() }, getMostVistedSites)
+    chrome.history.search({ text: "",  maxResults: 500, startTime: sevenDaysAgo.getTime() }, getMostVisitedSites)
 }
 
-function getMostVistedSites(history) {
+function getMostVisitedSites(history) {
     const websiteVisitCounts = {}
 
-    history.forEach(siteVisit => {
-        const website = new URL(siteVisit.url).hostname
+    history.forEach(historyItem => {
+        const website = new URL(historyItem.url).hostname
 
-        websiteVisitCounts[website] = (websiteVisitCounts[website] || 0) + 1
+        websiteVisitCounts[website] = (websiteVisitCounts[website] || 0) + historyItem.visitCount
     })
 
     const websiteVisitsSorted = Object.entries(websiteVisitCounts)
