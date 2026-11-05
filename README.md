@@ -29,7 +29,8 @@ After changing any file, click the reload icon on the extension's card in `chrom
 
 | Permission | Why |
 | --- | --- |
-| `history` | Reads the last 7 days of browsing history to find your most visited sites. This stays in your browser and is never sent anywhere. |
+| `history` | Reads the last 7 days of browsing history to find your most visited sites. This stays in your browser and is never sent anywhere. | 
+| `favicon` | Shows each site's icon next to it in the top sites list. |
 
 ## Data sources
 
