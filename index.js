@@ -21,23 +21,45 @@ function generateRandomLinearGradient() {
     return Math.random() < 0.5 ? linearGradient : radialGradient;
 }
 
+// Cache helpers
+function saveToCache(key, value) {
+    const entry = { savedAt: Date.now(), value }
+    localStorage.setItem(key, JSON.stringify(entry))
+}
+
+function loadFromCache(key, maxAgeMs) {
+    const saved = localStorage.getItem(key)
+    if (!saved) return null
+
+    try {
+        const entry = JSON.parse(saved)
+        if (maxAgeMs && Date.now() - entry.savedAt > maxAgeMs) return null
+        return entry.value
+    } catch {
+        return null
+    }
+}
+
 // Current location section
 
-
 function getLocationFromLocalStorage() {
-    const storedZipCode = localStorage.getItem("zipCode")
+    const savedLocation = loadFromCache("location")
+    if (savedLocation) {
+        showLocation(savedLocation)
+        return
+    }
 
+    const storedZipCode = localStorage.getItem("zipCode")
     if (storedZipCode) getZipCodeProperties(storedZipCode)
 }
 
 // Zip code form
 
-
 document.getElementById("zip-code-form").addEventListener("submit", handleZipCodeInput)
 
 function handleZipCodeInput(e) {
     e.preventDefault()
-    
+
     const zipCodeInput = document.getElementById("zipcode-input")
     const zipCode = zipCodeInput.value
     zipCodeInput.value = ""
@@ -46,40 +68,46 @@ function handleZipCodeInput(e) {
 
 function getZipCodeProperties(zipCode) {
     const currentLocationResultDiv = document.getElementById("current-location-result")
-    currentLocationResultDiv.innerHTML = "<p>Loading location...</p>";
+    currentLocationResultDiv.innerHTML = "<p>Loading location...</p>"
 
     fetch(`https://api.zippopotam.us/us/${zipCode}`)
         .then(res => {
-
-            if(!res.ok) {
+            if (!res.ok) {
                 if (res.status === 404) {
                     throw new Error(`Zip code ${zipCode} not found`)
                 } else {
                     throw new Error(`Error: ${res.status}`)
                 }
             }
-
             return res.json()
         })
         .then(data => {
-            const zipCode = data["post code"]
-            localStorage.setItem("zipCode", zipCode)
-            document.getElementById("zipcode-input").placeholder = zipCode
-
-            document.getElementById("current-location-heading").textContent = "Current Location:"
             const place = data.places[0]
-            currentLocationResultDiv.innerHTML = `<h2>${place["place name"]}, ${place["state abbreviation"]}</h2>`
+            const location = {
+                zipCode: data["post code"],
+                city: place["place name"],
+                state: place["state abbreviation"],
+                latitude: place.latitude,
+                longitude: place.longitude
+            }
 
-            const { longitude, latitude }  = place
-
-            getCurrentLocationWeatherProperties(latitude, longitude)
-            document.getElementById("weather-section").style.display = "block"
-            getMoonInformation(latitude, longitude)
-            document.getElementById("moon-section").style.display = "flex"
+            saveToCache("location", location)
+            showLocation(location)
         })
         .catch(err => {
             currentLocationResultDiv.innerHTML = `<p>${err.message}</p>`
         })
+}
+
+function showLocation(location) {
+    document.getElementById("zipcode-input").placeholder = location.zipCode
+    document.getElementById("current-location-heading").textContent = "Current Location:"
+    document.getElementById("current-location-result").innerHTML = `<h2>${location.city}, ${location.state}</h2>`
+
+    getCurrentLocationWeatherProperties(location)
+    document.getElementById("weather-section").style.display = "block"
+    getMoonInformation(location.latitude, location.longitude)
+    document.getElementById("moon-section").style.display = "flex"
 }
 
 // Time section
@@ -128,14 +156,26 @@ function showWeatherError(err) {
     document.getElementById("weather-last-updated").innerText = ""
 }
 
-function getCurrentLocationWeatherProperties(latitude, longitude) {
-    fetch(`https://api.weather.gov/points/${latitude},${longitude}`)
+function getCurrentLocationWeatherProperties(location) {
+    // Already know this location's forecast area? Skip the lookup.
+    if (location.forecastUrl) {
+        currentForecastUrl = location.forecastUrl
+        get7DayWeatherForecast(currentForecastUrl)
+        return
+    }
+
+    fetch(`https://api.weather.gov/points/${location.latitude},${location.longitude}`)
         .then(res => {
             if (!res.ok) throw new Error(`Couldn't look up the forecast area for this location (status ${res.status})`)
             return res.json()
         })
         .then(data => {
             currentForecastUrl = data.properties.forecast
+
+            // Save it with the location so next time we can skip the lookup
+            location.forecastUrl = currentForecastUrl
+            saveToCache("location", location)
+
             get7DayWeatherForecast(currentForecastUrl)
         })
         .catch(err => showWeatherError(err))
