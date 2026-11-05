@@ -157,10 +157,13 @@ main {
 
 .frequent-website-link {
     color: white;
+    text-decoration: none;
 }
 
-.frequent-website-link:hover {
-    color: blue;
+.frequent-website-link:hover,
+.frequent-website-link:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 4px;
 }
 
 /* Current location input */

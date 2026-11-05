@@ -10,6 +10,6 @@
         "newtab": "index.html"
     },
     "permissions": [
-        "history", "geolocation"
+        "history"
     ]
 }
