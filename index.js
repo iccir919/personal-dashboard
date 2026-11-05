@@ -299,7 +299,7 @@ function renderMostVisitedSites(top10VisitedWebsites) {
 
 // Moon phase
 
-function getMoonInformation(latitude, longitude) {
+async function getMoonInformation(latitude, longitude) {
     const today = new Date()
     const year = today.getFullYear()
     const month = today.getMonth() + 1
@@ -315,23 +315,21 @@ function getMoonInformation(latitude, longitude) {
 
     const moonIlluminationUrl = `https://aa.usno.navy.mil/api/rstt/oneday?date=${formattedDate}&coords=${latitude},${longitude}`
 
-    fetch(moonIlluminationUrl)
-        .then(res => {
-            if (!res.ok) {
-                throw new Error(`HTTP error! Response status: ${res.status}`)
-            }
-            return res.json()
-        })
-        .then(json => {
-            const moonData = json.properties.data
-            saveToCache("moon", { date: formattedDate, moonData })
-            showMoon(moonData)
-        })
-        .catch(err => {
-            console.error("Error fetching moon data", err)
-            document.getElementById("illumination").textContent = "Error loading data"
-            document.getElementById("current-phase").textContent = "N/A"
-        })
+    try {
+        const res = await fetch(moonIlluminationUrl)
+        if (!res.ok) {
+            throw new Error(`HTTP error! Response status: ${res.status}`)
+        }
+        const json = await res.json()
+        const moonData = json.properties.data
+
+        saveToCache("moon", { date: formattedDate, moonData })
+        showMoon(moonData)
+    } catch (err) {
+        console.error("Error fetching moon data", err)
+        document.getElementById("illumination").textContent = "Error loading data"
+        document.getElementById("current-phase").textContent = "N/A"
+    }
 }
 
 function showMoon(moonData) {
