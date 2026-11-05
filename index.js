@@ -130,16 +130,17 @@ function getCurrentTime() {
 // and update these, so there is only ever one "current" forecast.
 let currentForecastUrl = null
 let forecastTimeOfDay = "day"
+let currentForecast = null
+const FORECAST_MAX_AGE_MS = 30 * 60 * 1000 // 30 minutes
 
-// Runs once at startup. Attaching the listener here (instead of every time
-// a forecast loads) means each toggle click triggers exactly one fetch.
+// Runs once at startup. The toggle just re-draws the saved forecast, no fetch needed.
 function setupForecastTimeToggle() {
     const forecastTimeRadios = document.querySelectorAll("input[name='forecast-time']")
 
     forecastTimeRadios.forEach(radio => {
         radio.addEventListener("change", () => {
             forecastTimeOfDay = radio.value
-            if (currentForecastUrl) get7DayWeatherForecast(currentForecastUrl)
+            if (currentForecast) render7DayWeatherForecast(currentForecast, forecastTimeOfDay)
         })
     })
 }
@@ -182,6 +183,14 @@ function getCurrentLocationWeatherProperties(location) {
 }
 
 function get7DayWeatherForecast(forecastUrl) {
+    // Use the saved forecast if it's recent and for this same location
+    const savedForecast = loadFromCache("forecast", FORECAST_MAX_AGE_MS)
+    if (savedForecast && savedForecast.forecastUrl === forecastUrl) {
+        currentForecast = savedForecast.properties
+        render7DayWeatherForecast(currentForecast, forecastTimeOfDay)
+        return
+    }
+
     fetch(forecastUrl)
         .then(res => {
             if (!res.ok) throw new Error(`Couldn't load the forecast (status ${res.status})`)
@@ -192,7 +201,9 @@ function get7DayWeatherForecast(forecastUrl) {
             // forecast is on its way. Skip this old one so it can't overwrite it.
             if (forecastUrl !== currentForecastUrl) return
 
-            render7DayWeatherForecast(data.properties, forecastTimeOfDay)
+            currentForecast = data.properties
+            saveToCache("forecast", { forecastUrl, properties: data.properties })
+            render7DayWeatherForecast(currentForecast, forecastTimeOfDay)
         })
         .catch(err => {
             if (forecastUrl === currentForecastUrl) showWeatherError(err)
@@ -279,17 +290,20 @@ function renderMostVisitedSites(top10VisitedWebsites) {
 // Moon phase
 
 function getMoonInformation(latitude, longitude) {
-    const illuminationSpan = document.getElementById("illumination")
-    const currentPhaseSpan = document.getElementById("current-phase")
-
     const today = new Date()
     const year = today.getFullYear()
     const month = today.getMonth() + 1
     const day = today.getDate()
     const formattedDate = `${year}-${month}-${day}`
 
-    const moonIlluminationUrl = `https://aa.usno.navy.mil/api/rstt/oneday?date=${formattedDate}&coords=${latitude},${longitude}`
+    // The moon only changes once a day, so reuse today's data if we have it
+    const savedMoon = loadFromCache("moon")
+    if (savedMoon && savedMoon.date === formattedDate) {
+        showMoon(savedMoon.moonData)
+        return
+    }
 
+    const moonIlluminationUrl = `https://aa.usno.navy.mil/api/rstt/oneday?date=${formattedDate}&coords=${latitude},${longitude}`
 
     fetch(moonIlluminationUrl)
         .then(res => {
@@ -300,24 +314,25 @@ function getMoonInformation(latitude, longitude) {
         })
         .then(json => {
             const moonData = json.properties.data
-            console.log(moonData)
-            
-            // fracillum is a percentage (0-100), so we divide by 100 to get a 0-1 fraction for calculations
-            const fracIllumInt = parseInt(moonData.fracillum)
-            const fracIllum = fracIllumInt / 100
-            const curPhase = moonData.curphase
-
-            illuminationSpan.textContent = moonData.fracillum
-            currentPhaseSpan.textContent = curPhase
-
-            updateMoonPhase(fracIllum, curPhase)
-
+            saveToCache("moon", { date: formattedDate, moonData })
+            showMoon(moonData)
         })
         .catch(err => {
             console.error("Error fetching moon data", err)
-            illuminationSpan.textContent = "Error loading data"
-            currentPhaseSpan.textContent = "N/A"
+            document.getElementById("illumination").textContent = "Error loading data"
+            document.getElementById("current-phase").textContent = "N/A"
         })
+}
+
+function showMoon(moonData) {
+    // fracillum is a percentage string like "92%", so parseInt gives 92 and we divide by 100 to get 0.92
+    const fracIllum = parseInt(moonData.fracillum) / 100
+    const curPhase = moonData.curphase
+
+    document.getElementById("illumination").textContent = moonData.fracillum
+    document.getElementById("current-phase").textContent = curPhase
+
+    updateMoonPhase(fracIllum, curPhase)
 }
 
 function updateMoonPhase(illumination, curPhase) {
