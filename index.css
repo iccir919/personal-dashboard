@@ -158,6 +158,14 @@ main {
 .frequent-website-link {
     color: white;
     text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.frequent-website-icon {
+    width: 16px;
+    height: 16px;
 }
 
 .frequent-website-link:hover,

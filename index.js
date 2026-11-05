@@ -265,6 +265,13 @@ function getMostVisitedSites(history) {
     renderMostVisitedSites(top10VisitedWebsites)
 }
 
+function getFaviconUrl(pageUrl) {
+    const url = new URL(chrome.runtime.getURL("/_favicon/"))
+    url.searchParams.set("pageUrl", pageUrl)
+    url.searchParams.set("size", "32")
+    return url.toString()
+}
+
 function renderMostVisitedSites(top10VisitedWebsites) {
 
     const frequentWebsitesList = document.getElementById("frequent-websites-container")
@@ -278,6 +285,13 @@ function renderMostVisitedSites(top10VisitedWebsites) {
         link.target = "_blank"
         link.className = "frequent-website-link"
         link.textContent = websiteURL
+
+        const icon = document.createElement("img")
+        icon.className = "frequent-website-icon"
+        icon.src = getFaviconUrl(`https://${websiteURL}`)
+        icon.alt = ""
+        link.prepend(icon)
+
         listItem.appendChild(link)
         frequentWebsitesList.appendChild(listItem)
     }
