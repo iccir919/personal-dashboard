@@ -62,37 +62,32 @@ function handleZipCodeInput(e) {
     getZipCodeProperties(zipCode)
 }
 
-function getZipCodeProperties(zipCode) {
+async function getZipCodeProperties(zipCode) {
     const currentLocationResultDiv = document.getElementById("current-location-result")
     currentLocationResultDiv.innerHTML = "<p>Loading location...</p>"
 
-    fetch(`https://api.zippopotam.us/us/${zipCode}`)
-        .then(res => {
-            if (!res.ok) {
-                if (res.status === 404) {
-                    throw new Error(`Zip code ${zipCode} not found`)
-                } else {
-                    throw new Error(`Error: ${res.status}`)
-                }
-            }
-            return res.json()
-        })
-        .then(data => {
-            const place = data.places[0]
-            const location = {
-                zipCode: data["post code"],
-                city: place["place name"],
-                state: place["state abbreviation"],
-                latitude: place.latitude,
-                longitude: place.longitude
-            }
+    try {
+        const res = await fetch(`https://api.zippopotam.us/us/${zipCode}`)
+        if (!res.ok) {
+            if (res.status === 404) throw new Error(`Zip code ${zipCode} not found`)
+            throw new Error(`Error: ${res.status}`)
+        }
 
-            saveToCache("location", location)
-            showLocation(location)
-        })
-        .catch(err => {
-            currentLocationResultDiv.innerHTML = `<p>${err.message}</p>`
-        })
+        const data = await res.json()
+        const place = data.places[0]
+        const location = {
+            zipCode: data["post code"],
+            city: place["place name"],
+            state: place["state abbreviation"],
+            latitude: place.latitude,
+            longitude: place.longitude
+        }
+
+        saveToCache("location", location)
+        showLocation(location)
+    } catch (err) {
+        currentLocationResultDiv.innerHTML = `<p>${err.message}</p>`
+    }
 }
 
 function showLocation(location) {
@@ -153,7 +148,7 @@ function showWeatherError(err) {
     document.getElementById("weather-last-updated").innerText = ""
 }
 
-function getCurrentLocationWeatherProperties(location) {
+async function getCurrentLocationWeatherProperties(location) {
     // Already know this location's forecast area? Skip the lookup.
     if (location.forecastUrl) {
         currentForecastUrl = location.forecastUrl
@@ -161,24 +156,24 @@ function getCurrentLocationWeatherProperties(location) {
         return
     }
 
-    fetch(`https://api.weather.gov/points/${location.latitude},${location.longitude}`)
-        .then(res => {
-            if (!res.ok) throw new Error(`Couldn't look up the forecast area for this location (status ${res.status})`)
-            return res.json()
-        })
-        .then(data => {
-            currentForecastUrl = data.properties.forecast
+    try {
+        const res = await fetch(`https://api.weather.gov/points/${location.latitude},${location.longitude}`)
+        if (!res.ok) throw new Error(`Couldn't look up the forecast area for this location (status ${res.status})`)
 
-            // Save it with the location so next time we can skip the lookup
-            location.forecastUrl = currentForecastUrl
-            saveToCache("location", location)
+        const data = await res.json()
+        currentForecastUrl = data.properties.forecast
 
-            get7DayWeatherForecast(currentForecastUrl)
-        })
-        .catch(err => showWeatherError(err))
+        // Save it with the location so next time we can skip the lookup
+        location.forecastUrl = currentForecastUrl
+        saveToCache("location", location)
+
+        get7DayWeatherForecast(currentForecastUrl)
+    } catch (err) {
+        showWeatherError(err)
+    }
 }
 
-function get7DayWeatherForecast(forecastUrl) {
+async function get7DayWeatherForecast(forecastUrl) {
     // Use the saved forecast if it's recent and for this same location
     const savedForecast = loadFromCache("forecast", FORECAST_MAX_AGE_MS)
     if (savedForecast && savedForecast.forecastUrl === forecastUrl) {
@@ -187,23 +182,22 @@ function get7DayWeatherForecast(forecastUrl) {
         return
     }
 
-    fetch(forecastUrl)
-        .then(res => {
-            if (!res.ok) throw new Error(`Couldn't load the forecast (status ${res.status})`)
-            return res.json()
-        })
-        .then(data => {
-            // If the ZIP changed while this request was in flight, a newer
-            // forecast is on its way. Skip this old one so it can't overwrite it.
-            if (forecastUrl !== currentForecastUrl) return
+    try {
+        const res = await fetch(forecastUrl)
+        if (!res.ok) throw new Error(`Couldn't load the forecast (status ${res.status})`)
 
-            currentForecast = data.properties
-            saveToCache("forecast", { forecastUrl, properties: data.properties })
-            render7DayWeatherForecast(currentForecast, forecastTimeOfDay)
-        })
-        .catch(err => {
-            if (forecastUrl === currentForecastUrl) showWeatherError(err)
-        })
+        const data = await res.json()
+
+        // If the ZIP changed while this request was in flight, a newer
+        // forecast is on its way. Skip this old one so it can't overwrite it.
+        if (forecastUrl !== currentForecastUrl) return
+
+        currentForecast = data.properties
+        saveToCache("forecast", { forecastUrl, properties: data.properties })
+        render7DayWeatherForecast(currentForecast, forecastTimeOfDay)
+    } catch (err) {
+        if (forecastUrl === currentForecastUrl) showWeatherError(err)
+    }
 }
 
 function render7DayWeatherForecast(forecast, forecastTimeOfDay) {
