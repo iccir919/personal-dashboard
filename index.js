@@ -299,15 +299,17 @@ async function getMoonInformation(latitude, longitude) {
     const month = today.getMonth() + 1
     const day = today.getDate()
     const formattedDate = `${year}-${month}-${day}`
+    // Hours from UTC, like -8 for Pacific Standard Time (already includes daylight saving)
+    const timeZoneOffset = -today.getTimezoneOffset() / 60
 
     // The moon only changes once a day, so reuse today's data if we have it
     const savedMoon = loadFromCache("moon")
-    if (savedMoon && savedMoon.date === formattedDate) {
+    if (savedMoon && savedMoon.date === formattedDate && savedMoon.timeZoneOffset === timeZoneOffset) {
         showMoon(savedMoon.moonData)
         return
     }
 
-    const moonIlluminationUrl = `https://aa.usno.navy.mil/api/rstt/oneday?date=${formattedDate}&coords=${latitude},${longitude}`
+    const moonIlluminationUrl = `https://aa.usno.navy.mil/api/rstt/oneday?date=${formattedDate}&coords=${latitude},${longitude}&tz=${timeZoneOffset}&dst=false`
 
     try {
         const res = await fetch(moonIlluminationUrl)
@@ -317,13 +319,21 @@ async function getMoonInformation(latitude, longitude) {
         const json = await res.json()
         const moonData = json.properties.data
 
-        saveToCache("moon", { date: formattedDate, moonData })
+        saveToCache("moon", { date: formattedDate, timeZoneOffset, moonData })
         showMoon(moonData)
     } catch (err) {
         console.error("Error fetching moon data", err)
         document.getElementById("illumination").textContent = "Error loading data"
         document.getElementById("current-phase").textContent = "N/A"
     }
+}
+
+function formatTime(time) {
+    // "17:06" becomes "5:06 PM"
+    const [hours, minutes] = time.split(":").map(Number)
+    const period = hours >= 12 ? "PM" : "AM"
+    const hour12 = hours % 12 || 12
+    return `${hour12}:${String(minutes).padStart(2, "0")} ${period}`
 }
 
 function showMoon(moonData) {
@@ -335,6 +345,11 @@ function showMoon(moonData) {
     document.getElementById("current-phase").textContent = curPhase
 
     updateMoonPhase(fracIllum, curPhase)
+
+    const sunrise = moonData.sundata.find(item => item.phen === "Rise")
+    const sunset = moonData.sundata.find(item => item.phen === "Set")
+    document.getElementById("sunrise").textContent = sunrise ? formatTime(sunrise.time) : "N/A"
+    document.getElementById("sunset").textContent = sunset ? formatTime(sunset.time) : "N/A"
 }
 
 function updateMoonPhase(illumination, curPhase) {
