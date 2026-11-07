@@ -112,14 +112,6 @@ main {
     flex-direction: column;
 }
 
-.forecast-time-radios > legend {
-    font-size: .9rem;
-}
-
-.forecast-time-radios > label {
-    font-size: 1rem;
-}
-
 #weather-section > header {
     display: flex;
     justify-content: space-between;
@@ -130,13 +122,20 @@ main {
 }
 
 .weather-period-container {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: auto 1fr 4em 6em;
     align-items: center;
+    gap: 0.5em;
 }
 
 .weather-period-name {
     font-size: 1.05rem;
+}
+
+.weather-rain-chance {
+    font-size: 0.9rem;
+    opacity: 0.85;
+    text-align: right;
 }
 
 .weather-period-temperature-text {

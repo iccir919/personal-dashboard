@@ -117,24 +117,9 @@ function getCurrentTime() {
 
 // Weather section
 
-// Shared weather state. The Day/Night toggle and the ZIP form both read
-// and update these, so there is only ever one "current" forecast.
+// Shared weather state
 let currentForecastUrl = null
-let forecastTimeOfDay = "day"
-let currentForecast = null
 const FORECAST_MAX_AGE_MS = 30 * 60 * 1000 // 30 minutes
-
-// Runs once at startup. The toggle just re-draws the saved forecast, no fetch needed.
-function setupForecastTimeToggle() {
-    const forecastTimeRadios = document.querySelectorAll("input[name='forecast-time']")
-
-    forecastTimeRadios.forEach(radio => {
-        radio.addEventListener("change", () => {
-            forecastTimeOfDay = radio.value
-            if (currentForecast) render7DayWeatherForecast(currentForecast, forecastTimeOfDay)
-        })
-    })
-}
 
 function showWeatherError(err) {
     console.error("Error loading weather", err)
@@ -177,8 +162,7 @@ async function get7DayWeatherForecast(forecastUrl) {
     // Use the saved forecast if it's recent and for this same location
     const savedForecast = loadFromCache("forecast", FORECAST_MAX_AGE_MS)
     if (savedForecast && savedForecast.forecastUrl === forecastUrl) {
-        currentForecast = savedForecast.properties
-        render7DayWeatherForecast(currentForecast, forecastTimeOfDay)
+        render7DayWeatherForecast(savedForecast.properties)
         return
     }
 
@@ -192,36 +176,53 @@ async function get7DayWeatherForecast(forecastUrl) {
         // forecast is on its way. Skip this old one so it can't overwrite it.
         if (forecastUrl !== currentForecastUrl) return
 
-        currentForecast = data.properties
         saveToCache("forecast", { forecastUrl, properties: data.properties })
-        render7DayWeatherForecast(currentForecast, forecastTimeOfDay)
+        render7DayWeatherForecast(data.properties)
     } catch (err) {
         if (forecastUrl === currentForecastUrl) showWeatherError(err)
     }
 }
 
-function render7DayWeatherForecast(forecast, forecastTimeOfDay) {
+function render7DayWeatherForecast(forecast) {
     const forecastGenerationDatetime = new Date(forecast.generatedAt)
 
     document.getElementById("weather-last-updated").innerText = `Forecast generated: ${forecastGenerationDatetime.toLocaleDateString()} at ${forecastGenerationDatetime.toLocaleTimeString()}`
 
     const [current, ...rest] = forecast.periods
-    const displayedForecast = rest
-        .filter(period => forecastTimeOfDay === "day" ? period.isDaytime : !period.isDaytime)
-        .slice(0, 6) // Limit to 6 future periods
+    // Pair each day with the night right after it, which has that day's low
+    const nextDays = rest
+        .map((period, index) => ({ day: period, night: rest[index + 1] }))
+        .filter(({ day }) => day.isDaytime)
+        .slice(0, 6)
 
     document.getElementById("current-forecast-container").innerHTML = renderWeatherPeriod(current)
 
     document.getElementById("future-forecast-heading").style.display = ""
-    document.getElementById("future-forecast-heading").innerText = forecastTimeOfDay === "day" ? "Next 6 Days" : "Next 6 Nights"
-    document.getElementById("future-forecast-container").innerHTML = displayedForecast.map(period => renderWeatherPeriod(period)).join('')
+    document.getElementById("future-forecast-container").innerHTML = nextDays.map(renderDayRow).join("")
+
+    function getRainChance(period) {
+        const chance = period.probabilityOfPrecipitation?.value
+        return chance >= 30 ? `💧${chance}%` : ""
+    }
 
     function renderWeatherPeriod(period) {
         return `
             <div class="weather-period-container">
                 <img class="weather-period-icon" src="${period.icon}" />
                 <h4 class="weather-period-name">${period.name}</h4>
-                <p class="weather-period-temperature-text">${period.temperature}°${period.temperatureUnit}</p>
+                <span class="weather-rain-chance">${getRainChance(period)}</span>
+                <p class="weather-period-temperature-text">${period.temperature}°${period.temperatureUnit}</p>            </div>
+        `
+    }
+
+    function renderDayRow({ day, night }) {
+        const low = night ? ` / ${night.temperature}°` : ""
+        return `
+            <div class="weather-period-container">
+                <img class="weather-period-icon" src="${day.icon}" />
+                <h4 class="weather-period-name">${day.name}</h4>
+                <span class="weather-rain-chance">${getRainChance(day)}</span>
+                <p class="weather-period-temperature-text">${day.temperature}°${low}</p>
             </div>
         `
     }
@@ -409,7 +410,6 @@ function updateMoonPhase(illumination, curPhase) {
 // Initialization
 
 function initDashboard() {
-    setupForecastTimeToggle()
     getLocationFromLocalStorage()
     getBrowsingHistory()
     getRandomBackground()
