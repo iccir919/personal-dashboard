@@ -200,17 +200,12 @@ function render7DayWeatherForecast(forecast) {
     document.getElementById("future-forecast-heading").style.display = ""
     document.getElementById("future-forecast-container").innerHTML = nextDays.map(renderDayRow).join("")
 
-    function getRainChance(period) {
-        const chance = period.probabilityOfPrecipitation?.value
-        return chance >= 30 ? `💧${chance}%` : ""
-    }
-
     function renderWeatherPeriod(period) {
         return `
             <div class="weather-period-container">
-                <img class="weather-period-icon" src="${period.icon}" />
+                ${renderIcon(period)}
                 <h4 class="weather-period-name">${period.name}</h4>
-                <span class="weather-rain-chance">${getRainChance(period)}</span>
+                <span class="weather-wind">${getWind(period)}</span>
                 <p class="weather-period-temperature-text">${period.temperature}°${period.temperatureUnit}</p>            </div>
         `
     }
@@ -219,12 +214,52 @@ function render7DayWeatherForecast(forecast) {
         const low = night ? ` / ${night.temperature}°` : ""
         return `
             <div class="weather-period-container">
-                <img class="weather-period-icon" src="${day.icon}" />
+                ${renderIcon(day)}
                 <h4 class="weather-period-name">${day.name}</h4>
-                <span class="weather-rain-chance">${getRainChance(day)}</span>
+                <span class="weather-wind">${getWind(day)}</span>
                 <p class="weather-period-temperature-text">${day.temperature}°${low}</p>
             </div>
         `
+    }
+
+    function renderIcon(period) {
+        const emoji = getWeatherEmoji(period)
+        const isWet = ["🌧️", "⛈️", "❄️"].includes(emoji)
+        const chance = period.probabilityOfPrecipitation?.value
+        const chanceText = isWet && chance ? `<span class="weather-rain-chance">${chance}%</span>` : ""
+
+        return `<span class="weather-period-icon">${emoji}${chanceText}</span>`
+    }
+
+    function getWeatherEmoji(period) {
+        const forecast = period.shortForecast.toLowerCase()
+
+        // Weather that matters most comes first
+        if (forecast.includes("thunder")) return "⛈️"
+        if (forecast.includes("snow")) return "❄️"
+        if (forecast.includes("rain") || forecast.includes("showers") || forecast.includes("drizzle")) return "🌧️"
+
+        // Only show fog when it's the whole forecast, not "Partly Cloudy then Patchy Fog"
+        if (forecast.includes("fog") && !forecast.includes("then")) return "🌫️"
+
+        // Night: no sun emoji
+        if (!period.isDaytime) {
+            if (forecast.includes("cloudy")) return "☁️"
+            return "🌙"
+        }
+
+        // Day: from sunny to cloudy
+        if (forecast.includes("mostly sunny")) return "🌤️"
+        if (forecast.includes("partly")) return "⛅"
+        if (forecast.includes("mostly cloudy")) return "🌥️"
+        if (forecast.includes("cloudy")) return "☁️"
+        return "☀️"
+    }
+
+    function getWind(period) {
+        if (!period.windSpeed) return ""
+        const speed = period.windSpeed.replace(" to ", "-")
+        return `${period.windDirection} ${speed}`
     }
 }
 

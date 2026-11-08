@@ -117,31 +117,46 @@ main {
     justify-content: space-between;
 }
 
-.weather-period-icon {
-    width: 3vw;
-}
-
 .weather-period-container {
     display: grid;
-    grid-template-columns: auto 1fr 4em 6em;
+    grid-template-columns: 4.5rem 1fr 8em 6em;
     align-items: center;
-    gap: 0.5em;
+    gap: 1em;
+    padding: 1.25em 0;
+}
+
+.weather-period-icon {
+    font-size: 1.75rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.25em;
+}
+
+.weather-rain-chance {
+    font-size: 0.75rem;
+    font-weight: bold;
 }
 
 .weather-period-name {
     font-size: 1.05rem;
+    margin: 0;
 }
 
-.weather-rain-chance {
+.weather-wind {
     font-size: 0.9rem;
     opacity: 0.85;
     text-align: right;
+    white-space: nowrap;
 }
 
 .weather-period-temperature-text {
     font-size: 1.15rem;
     font-weight: bold;
+    margin: 0;
+    text-align: right;
 }
+
 
 #weather-last-updated {
     text-align: center;
@@ -199,7 +214,4 @@ main {
         width: 100%;
     }
 
-    .weather-period-icon {
-        width: 10vw;
-    }
 }
