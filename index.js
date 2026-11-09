@@ -300,20 +300,35 @@ function getBrowsingHistory() {
 }
 
 function getMostVisitedSites(history) {
-    const websiteVisitCounts = {}
+    const sites = {}
 
     history.forEach(historyItem => {
-        const website = new URL(historyItem.url).hostname
+        const url = new URL(historyItem.url)
 
-        websiteVisitCounts[website] = (websiteVisitCounts[website] || 0) + historyItem.visitCount
+        // Skip chrome:// pages, extension pages, and other non-website URLs
+        if (!url.protocol.startsWith("http")) return
+
+        // host includes the port, so localhost:3000 and localhost:5173 stay separate
+        const site = url.host
+
+        // First time seeing this site: start its entry
+        if (!sites[site]) {
+            sites[site] = { totalVisits: 0, topPage: historyItem }
+        }
+
+        sites[site].totalVisits += historyItem.visitCount
+
+        // Remember whichever page on this site you've visited the most
+        if (historyItem.visitCount > sites[site].topPage.visitCount) {
+            sites[site].topPage = historyItem
+        }
     })
 
-    const websiteVisitsSorted = Object.entries(websiteVisitCounts)
-        .sort(([, countA], [, countB] ) => countB - countA)
+    const top10Sites = Object.values(sites)
+        .sort((a, b) => b.totalVisits - a.totalVisits)
+        .slice(0, 10)
 
-    const top10VisitedWebsites = websiteVisitsSorted.slice(0, 10);
-
-    renderMostVisitedSites(top10VisitedWebsites)
+    renderMostVisitedSites(top10Sites)
 }
 
 function getFaviconUrl(pageUrl) {
@@ -323,26 +338,33 @@ function getFaviconUrl(pageUrl) {
     return url.toString()
 }
 
-function renderMostVisitedSites(top10VisitedWebsites) {
-
+function renderMostVisitedSites(top10Sites) {
     const frequentWebsitesList = document.getElementById("frequent-websites-container")
     frequentWebsitesList.innerHTML = ""
 
-    for (let [websiteURL, count] of top10VisitedWebsites) {
+    for (const site of top10Sites) {
+        const page = site.topPage
+
         const listItem = document.createElement("li")
         listItem.className = "frequent-website-list-item"
+
         const link = document.createElement("a")
-        link.href = `https://${websiteURL}`
+        link.href = page.url
         link.target = "_blank"
         link.className = "frequent-website-link"
-        link.textContent = websiteURL
+        link.title = page.url
 
         const icon = document.createElement("img")
         icon.className = "frequent-website-icon"
-        icon.src = getFaviconUrl(`https://${websiteURL}`)
+        icon.src = getFaviconUrl(page.url)
         icon.alt = ""
-        link.prepend(icon)
 
+        const title = document.createElement("span")
+        title.className = "frequent-website-title"
+        // Some pages have no title, so fall back to the site's address
+        title.textContent = page.title || new URL(page.url).host
+
+        link.append(icon, title)
         listItem.appendChild(link)
         frequentWebsitesList.appendChild(listItem)
     }

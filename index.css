@@ -209,6 +209,13 @@ main {
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
+    max-width: 100%;
+}
+
+.frequent-website-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .frequent-website-icon {
