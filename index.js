@@ -206,7 +206,8 @@ function render7DayWeatherForecast(forecast) {
                 ${renderIcon(period)}
                 <h4 class="weather-period-name">${period.name}</h4>
                 <span class="weather-wind">${getWind(period)}</span>
-                <p class="weather-period-temperature-text">${period.temperature}°${period.temperatureUnit}</p>            </div>
+                <p class="weather-period-temperature-text">${period.temperature}°${period.temperatureUnit}</p>            
+            </div>
         `
     }
 
@@ -388,6 +389,81 @@ function showMoon(moonData) {
     document.getElementById("sunset").textContent = sunset ? formatTime(sunset.time) : "N/A"
 }
 
+async function getMoonPhases() {
+    // Phase times never change, so one fetch per day is plenty
+    const todayKey = new Date().toDateString()
+    const saved = loadFromCache("moonPhases")
+    if (saved && saved.date === todayKey) {
+        showMoonPhases(saved.phasedata)
+        return
+    }
+
+    // Start about a month back so the list includes the previous new and full moon
+    const start = new Date()
+    start.setDate(start.getDate() - 30)
+    const startDate = `${start.getFullYear()}-${start.getMonth() + 1}-${start.getDate()}`
+
+    try {
+        const res = await fetch(`https://aa.usno.navy.mil/api/moon/phases/date?date=${startDate}&nump=10`)
+        if (!res.ok) throw new Error(`Couldn't load moon phases (status ${res.status})`)
+
+        const json = await res.json()
+        saveToCache("moonPhases", { date: todayKey, phasedata: json.phasedata })
+        showMoonPhases(json.phasedata)
+    } catch (err) {
+        console.error("Error loading moon phases", err)
+        document.getElementById("moon-timeline").textContent = ""
+    }
+}
+
+function phaseToDate(phase) {
+    // The API gives UTC times, so build the date in UTC; JavaScript shows it in your local time
+    const [hours, minutes] = phase.time.split(":").map(Number)
+    return new Date(Date.UTC(phase.year, phase.month - 1, phase.day, hours, minutes))
+}
+
+const PHASE_EMOJI = {
+    "New Moon": "🌑",
+    "First Quarter": "🌓",
+    "Full Moon": "🌕",
+    "Last Quarter": "🌗"
+}
+
+function showMoonPhases(phasedata) {
+    const now = new Date()
+    const phases = phasedata.map(phase => ({ name: phase.phase, date: phaseToDate(phase) }))
+
+    // Position of the first phase that hasn't happened yet
+    const nextIndex = phases.findIndex(phase => phase.date > now)
+    if (nextIndex === -1) return
+
+    // Three before it, and it plus two more after
+    const shown = phases.slice(Math.max(0, nextIndex - 3), nextIndex + 3)
+
+    document.getElementById("moon-timeline").innerHTML = shown.map(renderTimelinePhase).join("")
+}
+
+function renderTimelinePhase(phase) {
+    const isToday = phase.date.toDateString() === new Date().toDateString()
+    const isPast = phase.date <= new Date()
+
+    // Today's phase shows its time; the rest show their date
+    const label = isToday
+        ? phase.date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+        : phase.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+
+    const classes = ["moon-timeline-phase"]
+    if (isPast) classes.push("is-past")
+    if (isToday) classes.push("is-today")
+
+    return `
+        <div class="${classes.join(" ")}" title="${phase.name}">
+            <span class="moon-timeline-emoji">${PHASE_EMOJI[phase.name]}</span>
+            <span class="moon-timeline-date">${label}</span>
+        </div>
+    `
+}
+
 function updateMoonPhase(illumination, curPhase) {
     const moonShadow = document.getElementById("moon-shadow")
     // Reset properties to ensure proper rendering for each phase
@@ -446,6 +522,7 @@ function updateMoonPhase(illumination, curPhase) {
 
 function initDashboard() {
     getLocationFromLocalStorage()
+    getMoonPhases()
     getBrowsingHistory()
     getRandomBackground()
     getCurrentTime()

@@ -91,7 +91,35 @@ main {
     z-index: 2;
 }
 
-  
+.moon-timeline {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75em;
+    width: 100%;
+    margin: 0.5em 0;
+}
+
+.moon-timeline-phase {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25em;
+    font-size: 0.85rem;
+}
+
+.moon-timeline-emoji {
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+.moon-timeline-phase.is-past {
+    opacity: 0.6;
+}
+
+.moon-timeline-phase.is-today {
+    font-weight: bold;
+    opacity: 1;
+}
 
 /* Time section */
 
