@@ -104,14 +104,21 @@ function showLocation(location) {
 // Time section
 
 function getCurrentTime() {
-    const date = new Date()
-    document.getElementById("time-text").textContent = date.toLocaleTimeString("en-us")
-    setInterval(() => {
-        const now = new Date();
-        const timeEl = document.getElementById("time-text");
-        const formattedTime = now.toLocaleTimeString("en-us");
-        if (timeEl.textContent !== formattedTime) timeEl.textContent = formattedTime;
-    }, 1000)
+    updateClock()
+    setInterval(updateClock, 1000)
+}
+
+function updateClock() {
+    const now = new Date()
+    const time = now.toLocaleTimeString("en-US")
+    const date = now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })
+
+    const timeEl = document.getElementById("time-text")
+    const dateEl = document.getElementById("date-text")
+
+    // Only touch the page when something actually changed
+    if (timeEl.textContent !== time) timeEl.textContent = time
+    if (dateEl.textContent !== date) dateEl.textContent = date
 }
 
 

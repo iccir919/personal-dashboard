@@ -35,7 +35,8 @@ main {
 }
 
 .mid-col {
-    justify-content: space-around;
+    justify-content: flex-start;
+    gap: 1em;
 }
 
 .section-heading {
@@ -126,6 +127,13 @@ main {
 #time-text {
     text-align: center;
     font-size: 4.25rem;
+    margin-bottom: 0;
+}
+
+#date-text {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-top: 0.25em;
 }
 
 /* Weather section */ 
@@ -143,6 +151,16 @@ main {
 #weather-section > header {
     display: flex;
     justify-content: space-between;
+}
+
+#forecast-container h3 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.75;
+    margin: 1.5em 0 0.25em;
+    padding-bottom: 0.4em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .weather-period-container {
@@ -230,6 +248,10 @@ main {
 }
 
 /* Current location input */
+.current-location-section {
+    margin-top: auto;
+}
+
 .current-location-section > header {
     display: flex;
     justify-content: space-between;
