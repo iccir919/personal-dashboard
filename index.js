@@ -202,8 +202,7 @@ function render7DayWeatherForecast(forecast) {
 
     function renderWeatherPeriod(period) {
         return `
-            <div class="weather-period-container">
-                ${renderIcon(period)}
+            <div class="weather-period-container" title="${toTitle(period.detailedForecast)}">                ${renderIcon(period)}
                 <h4 class="weather-period-name">${period.name}</h4>
                 <span class="weather-wind">${getWind(period)}</span>
                 <p class="weather-period-temperature-text">${period.temperature}°${period.temperatureUnit}</p>            
@@ -213,8 +212,12 @@ function render7DayWeatherForecast(forecast) {
 
     function renderDayRow({ day, night }) {
         const low = night ? ` / ${night.temperature}°` : ""
+        const details = night
+            ? `${day.name}: ${day.detailedForecast}\n\n${night.name}: ${night.detailedForecast}`
+            : day.detailedForecast
+
         return `
-            <div class="weather-period-container">
+            <div class="weather-period-container" title="${toTitle(details)}">
                 ${renderIcon(day)}
                 <h4 class="weather-period-name">${day.name}</h4>
                 <span class="weather-wind">${getWind(day)}</span>
@@ -256,6 +259,11 @@ function render7DayWeatherForecast(forecast) {
         if (forecast.includes("cloudy")) return "☁️"
         return "☀️"
     }
+
+    function toTitle(text) {
+        // A " inside the text would end the title="..." early, so swap it for the HTML-safe version
+        return text.replaceAll('"', "&quot;")
+    }    
 
     function getWind(period) {
         if (!period.windSpeed) return ""
