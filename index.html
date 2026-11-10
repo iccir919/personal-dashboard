@@ -36,11 +36,13 @@
                     <header>
                         <h2 id="current-location-heading" class="section-heading">Enter your ZIP code:</h2>
                         <span id="current-location-result"></span>
+                        <button type="button" id="change-location-btn" class="text-button" hidden>Change</button>
                     </header>
                     <form id="zip-code-form">
-                        <label for="zipcode">ZIP Code:</label>
+                        <label for="zipcode-input">ZIP Code:</label>
                         <input type="text" id="zipcode-input" name="zipcode" pattern="\d{5}" maxlength="5" inputmode="numeric" required>
                         <button type="submit">Submit</button>
+                        <button type="button" id="cancel-zip-btn" class="text-button" hidden>Cancel</button>
                     </form>
                 </section>
             </div>

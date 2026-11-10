@@ -53,6 +53,18 @@ function getLocationFromLocalStorage() {
 
 document.getElementById("zip-code-form").addEventListener("submit", handleZipCodeInput)
 
+document.getElementById("change-location-btn").addEventListener("click", () => {
+    document.getElementById("zip-code-form").hidden = false
+    document.getElementById("cancel-zip-btn").hidden = false
+    document.getElementById("change-location-btn").hidden = true
+    document.getElementById("zipcode-input").focus()
+})
+
+document.getElementById("cancel-zip-btn").addEventListener("click", () => {
+    document.getElementById("zip-code-form").hidden = true
+    document.getElementById("change-location-btn").hidden = false
+})
+
 function handleZipCodeInput(e) {
     e.preventDefault()
 
@@ -91,6 +103,8 @@ async function getZipCodeProperties(zipCode) {
 }
 
 function showLocation(location) {
+    document.getElementById("zip-code-form").hidden = true
+    document.getElementById("change-location-btn").hidden = false
     document.getElementById("zipcode-input").placeholder = location.zipCode
     document.getElementById("current-location-heading").textContent = "Current Location:"
     document.getElementById("current-location-result").innerHTML = `<h2>${location.city}, ${location.state}</h2>`
