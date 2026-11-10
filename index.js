@@ -322,6 +322,7 @@ function getBrowsingHistory() {
 
 function getMostVisitedSites(history) {
     const sites = {}
+    const hiddenSites = loadFromCache("hiddenSites") || []
 
     history.forEach(historyItem => {
         const url = new URL(historyItem.url)
@@ -331,10 +332,11 @@ function getMostVisitedSites(history) {
 
         // host includes the port, so localhost:3000 and localhost:5173 stay separate
         const site = url.host
+        if (hiddenSites.includes(site)) return
 
         // First time seeing this site: start its entry
         if (!sites[site]) {
-            sites[site] = { totalVisits: 0, topPage: historyItem }
+            sites[site] = { host: site, totalVisits: 0, topPage: historyItem }
         }
 
         sites[site].totalVisits += historyItem.visitCount
@@ -371,7 +373,6 @@ function renderMostVisitedSites(top10Sites) {
 
         const link = document.createElement("a")
         link.href = page.url
-        link.target = "_blank"
         link.className = "frequent-website-link"
         link.title = page.url
 
@@ -386,10 +387,40 @@ function renderMostVisitedSites(top10Sites) {
         title.textContent = page.title || new URL(page.url).host
 
         link.append(icon, title)
-        listItem.appendChild(link)
+        
+        const hideButton = document.createElement("button")
+        hideButton.type = "button"
+        hideButton.className = "hide-site-btn"
+        hideButton.textContent = "✕"
+        hideButton.title = `Hide ${site.host}`
+        hideButton.setAttribute("aria-label", `Hide ${site.host}`)
+        hideButton.addEventListener("click", () => hideSite(site.host))
+
+        listItem.append(link, hideButton)
+
         frequentWebsitesList.appendChild(listItem)
     }
+
+    // Show the "show hidden" link only when something is hidden
+    const hiddenCount = (loadFromCache("hiddenSites") || []).length
+    const unhideButton = document.getElementById("unhide-sites-btn")
+    unhideButton.hidden = hiddenCount === 0
+    unhideButton.textContent = `Show ${hiddenCount} hidden site${hiddenCount === 1 ? "" : "s"}`
 }
+
+function hideSite(host) {
+    const hiddenSites = loadFromCache("hiddenSites") || []
+    hiddenSites.push(host)
+    saveToCache("hiddenSites", hiddenSites)
+
+    // Rebuild the list so the next site moves up
+    getBrowsingHistory()
+}
+
+document.getElementById("unhide-sites-btn").addEventListener("click", () => {
+    localStorage.removeItem("hiddenSites")
+    getBrowsingHistory()
+})
 
 // Moon phase
 
