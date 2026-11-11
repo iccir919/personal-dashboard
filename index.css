@@ -31,6 +31,16 @@ body {
     font: inherit;
 }
 
+/* Small uppercase labels: "LOCATION", "RIGHT NOW", "NEXT 6 DAYS" */
+.location-label,
+#forecast-container h3 {
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.75;
+}
+
 
 /* ========== Layout ========== */
 
@@ -217,23 +227,118 @@ main {
 }
 
 
-/* ========== Location ========== */
+/* ========== Location (top of the weather column) ========== */
 
 .current-location-section {
-    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5em;
 }
 
-.current-location-section > header {
+.location-label {
+    margin: 0;
+}
+
+/* Places + "+ Add" on one line */
+.location-row {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5em 1.5em;
+}
+
+.location-switcher {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25em 1em;
+    font-size: 1.25rem;
+}
+
+.pinned-location {
+    display: inline-flex;
     align-items: center;
 }
 
-.current-location-section > form {
+/* Each place: faded, unless it's the current one */
+.pinned-location-btn {
+    background: none;
+    border: none;
+    color: white;
+    font: inherit;
+    cursor: pointer;
+    padding: 0;
+    opacity: 0.75;
+}
+
+.pinned-location-btn:hover {
+    opacity: 1;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.pinned-location-btn.is-current {
+    opacity: 1;
+    font-weight: bold;
+}
+
+/* Same hover-to-show pattern as the top sites ✕ */
+.unpin-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 0.75rem;
+    line-height: 1;
+    padding: 0 0.25em;
+    opacity: 0;
+}
+
+.pinned-location:hover .unpin-btn,
+.unpin-btn:focus-visible {
+    opacity: 0.7;
+}
+
+.unpin-btn:hover {
+    opacity: 1;
+}
+
+/* ZIP form (first visit, or after clicking "+ Add") */
+.zip-form {
     display: flex;
-    justify-content: center;
     align-items: center;
     gap: 1em;
+}
+
+.zip-form input {
+    width: 11em;
+    padding: 0.45em 0.75em;
+    font: inherit;
+    color: white;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 6px;
+    text-shadow: none;
+}
+
+.zip-form input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.zip-form input:focus {
+    outline: none;
+    border-color: white;
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* "Loading location..." and error messages */
+.location-status {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.location-status:empty {
+    display: none;
 }
 
 
@@ -249,12 +354,8 @@ main {
     flex-direction: column;
 }
 
-/* "Right Now" and "Next 6 Days" labels */
+/* "Right Now" and "Next 6 Days" labels (font styles are in Base) */
 #forecast-container h3 {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    opacity: 0.75;
     margin: 1.5em 0 0.25em;
     padding-bottom: 0.4em;
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);

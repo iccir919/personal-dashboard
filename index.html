@@ -12,7 +12,7 @@
                     <h1 class="app-title">Personal Dashboard</h1>
                 </section>
                 <section id="most-frequent-websites-section">
-                    <h2 class="section-heading">Top 10 Recently Frequently Visited Websites</h2>
+                    <h2 class="section-heading">Top Sites</h2>
                     <ol id="frequent-websites-container">
 
                     </ol>
@@ -33,25 +33,25 @@
                     <h2 id="time-text"></h2>
                     <p id="date-text"></p>
                 </section>
-                <section class="current-location-section">
-                    <header>
-                        <h2 id="current-location-heading" class="section-heading">Enter your ZIP code:</h2>
-                        <span id="current-location-result"></span>
-                        <button type="button" id="change-location-btn" class="text-button" hidden>Change</button>
-                    </header>
-                    <form id="zip-code-form">
-                        <label for="zipcode-input">ZIP Code:</label>
-                        <input type="text" id="zipcode-input" name="zipcode" pattern="\d{5}" maxlength="5" inputmode="numeric" required>
-                        <button type="submit">Submit</button>
-                        <button type="button" id="cancel-zip-btn" class="text-button" hidden>Cancel</button>
-                    </form>
-                </section>
             </div>
             <div class="layout-col right-col">
+                <h2 class="section-heading">Weather</h2>
+
+                <section class="current-location-section">
+                    <h2 id="current-location-heading" class="location-label">Enter your ZIP code</h2>
+                    <div id="location-row" class="location-row" hidden>
+                        <div id="location-switcher" class="location-switcher"></div>
+                        <button type="button" id="change-location-btn" class="text-button">+ Add</button>
+                    </div>
+                    <form id="zip-code-form" class="zip-form">
+                        <input type="text" id="zipcode-input" name="zipcode" aria-label="ZIP code" placeholder="ZIP code" pattern="\d{5}" maxlength="5" inputmode="numeric" required>
+                        <button type="submit" class="text-button">Save</button>
+                        <button type="button" id="cancel-zip-btn" class="text-button" hidden>Cancel</button>
+                    </form>
+                    <p id="current-location-result" class="location-status"></p>
+                </section>
+
                 <section id="weather-section">
-                    <header>
-                        <h2 class="section-heading">Weather</h2>
-                    </header>
                     <div id="forecast-container">
                         <h3>Right Now</h3>
                         <div id="current-forecast-container">
