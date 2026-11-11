@@ -123,6 +123,14 @@ function getPinnedLocations() {
     return loadFromCache("pinnedLocations") || []
 }
 
+function updatePinnedLocation(location) {
+    // Replace the pinned copy of this place with the updated one
+    const pinned = getPinnedLocations().map(place =>
+        place.zipCode === location.zipCode ? location : place
+    )
+    saveToCache("pinnedLocations", pinned)
+}
+
 function renderLocationSwitcher(current) {
     const switcher = document.getElementById("location-switcher")
     switcher.innerHTML = ""
@@ -239,6 +247,7 @@ async function getCurrentLocationWeatherProperties(location) {
         // Save it with the location so next time we can skip the lookup
         location.forecastUrl = currentForecastUrl
         saveToCache("location", location)
+        updatePinnedLocation(location)
 
         get7DayWeatherForecast(currentForecastUrl)
     } catch (err) {
@@ -247,9 +256,11 @@ async function getCurrentLocationWeatherProperties(location) {
 }
 
 async function get7DayWeatherForecast(forecastUrl) {
-    // Use the saved forecast if it's recent and for this same location
-    const savedForecast = loadFromCache("forecast", FORECAST_MAX_AGE_MS)
-    if (savedForecast && savedForecast.forecastUrl === forecastUrl) {
+    // Each place gets its own saved forecast, named after its forecast URL
+    const cacheKey = `forecast-${forecastUrl}`
+
+    const savedForecast = loadFromCache(cacheKey, FORECAST_MAX_AGE_MS)
+    if (savedForecast) {
         render7DayWeatherForecast(savedForecast.properties)
         return
     }
@@ -264,7 +275,7 @@ async function get7DayWeatherForecast(forecastUrl) {
         // forecast is on its way. Skip this old one so it can't overwrite it.
         if (forecastUrl !== currentForecastUrl) return
 
-        saveToCache("forecast", { forecastUrl, properties: data.properties })
+        saveToCache(cacheKey, { properties: data.properties })
         render7DayWeatherForecast(data.properties)
     } catch (err) {
         if (forecastUrl === currentForecastUrl) showWeatherError(err)
