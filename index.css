@@ -401,6 +401,16 @@ main {
     white-space: nowrap;
 }
 
+.wind-arrow {
+    display: inline-block;
+    width: 1em;
+    line-height: 1;
+    text-align: center;
+    transform-origin: center;
+    font-weight: bold;
+    margin-right: 0.25em;
+}
+
 .weather-period-temperature-text {
     font-size: 1.15rem;
     font-weight: bold;

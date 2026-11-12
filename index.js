@@ -379,7 +379,19 @@ function render7DayWeatherForecast(forecast) {
     function getWind(period) {
         if (!period.windSpeed) return ""
         const speed = period.windSpeed.replace(" to ", "-")
-        return `${period.windDirection} ${speed}`
+
+        // The 16 compass directions, in order, each 22.5° apart (360 / 16)
+        const compass = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+                         "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+        const index = compass.indexOf(period.windDirection)
+
+        // Unknown direction? Fall back to the letters
+        if (index === -1) return `${period.windDirection} ${speed}`
+
+        // Wind is reported as where it comes FROM, so turn the arrow around (+180°)
+        const degrees = index * 22.5 + 180
+
+        return `<span class="wind-arrow" style="transform: rotate(${degrees}deg)">↑</span>${speed}`
     }
 }
 
