@@ -756,8 +756,8 @@ function renderTimelinePhase(phase) {
 
     return `
         <div class="${classes.join(" ")}" title="${phase.name}">
-            <span class="moon-timeline-emoji">${PHASE_EMOJI[phase.name]}</span>
             <span class="moon-timeline-date">${label}</span>
+            <span class="moon-timeline-emoji">${PHASE_EMOJI[phase.name]}</span>
         </div>
     `
 }
