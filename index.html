@@ -7,18 +7,20 @@
     </head>
     <body>
         <main>
+            <!-- Left: title and top sites -->
             <div class="layout-col left-col">
                 <section>
                     <h1 class="app-title">Personal Dashboard</h1>
                 </section>
+
                 <section id="most-frequent-websites-section">
                     <h2 class="section-heading">Top Sites</h2>
-                    <ol id="frequent-websites-container">
-
-                    </ol>
+                    <ol id="frequent-websites-container"></ol>
                     <button type="button" id="unhide-sites-btn" class="text-button" hidden></button>
                 </section>
-            </div>  
+            </div>
+
+            <!-- Middle: moon, time, date -->
             <div class="layout-col mid-col">
                 <section id="moon-section">
                     <div class="moon-container">
@@ -29,11 +31,14 @@
                     <div id="moon-timeline" class="moon-timeline"></div>
                     <p>Sunrise <span id="sunrise"></span> · Sunset <span id="sunset"></span></p>
                 </section>
+
                 <section class="time-container">
                     <h2 id="time-text"></h2>
                     <p id="date-text"></p>
                 </section>
             </div>
+
+            <!-- Right: location and weather -->
             <div class="layout-col right-col">
                 <h2 class="section-heading">Weather</h2>
 
@@ -53,17 +58,16 @@
 
                 <section id="weather-section">
                     <div id="forecast-container">
-                        <h3>Right Now</h3>
-                        <div id="current-forecast-container">
-                        </div>
-                        <h3 id="future-forecast-heading">Next 6 Days</h3>
-                        <div id="future-forecast-container">
-                        </div>
+                        <h3 id="future-forecast-heading">Forecast</h3>
+                        <!-- One dropdown row per day; filled in by render7DayWeatherForecast -->
+                        <div id="future-forecast-container"></div>
                     </div>
+
                     <p id="weather-last-updated"></p>
                 </section>
             </div>
         </main>
+
         <script src="index.js"></script>
     </body>
 </html>
