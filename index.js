@@ -559,6 +559,16 @@ function showMoon(moonData) {
     const sunset = moonData.sundata.find(item => item.phen === "Set")
     document.getElementById("sunrise").textContent = sunrise ? formatTime(sunrise.time) : "N/A"
     document.getElementById("sunset").textContent = sunset ? formatTime(sunset.time) : "N/A"
+
+        // Moonrise and moonset go in a hover tooltip on the big moon
+    const moonrise = moonData.moondata?.find(item => item.phen === "Rise")
+    const moonset = moonData.moondata?.find(item => item.phen === "Set")
+
+    const moonTimes = []
+    if (moonrise) moonTimes.push(`Moonrise ${formatTime(moonrise.time)}`)
+    if (moonset) moonTimes.push(`Moonset ${formatTime(moonset.time)}`)
+
+    document.querySelector(".moon-container").title = moonTimes.join(" · ")
 }
 
 async function getMoonPhases() {
