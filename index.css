@@ -463,6 +463,11 @@ main {
     cursor: pointer;
 }
 
+/* When a day is open, its hours already show the weather, so hide the day's own emoji */
+.day-row[open] .weather-period-icon {
+    visibility: hidden;
+}
+
 /* No outline after a mouse click, but a soft one when using the keyboard (Tab) */
 .day-row summary:focus {
     outline: none;
