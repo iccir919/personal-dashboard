@@ -1,3 +1,5 @@
+@charset "UTF-8";
+
 /* ========== Base ========== */
 
 * {
@@ -486,14 +488,14 @@ main {
 
 /* Our own small arrow before the day name: ▸ closed, ▾ open */
 .day-row .weather-period-name::before {
-    content: "▸";
+    content: "\25B8";
     display: inline-block;
     width: 1em;
     opacity: 0.6;
 }
 
 .day-row[open] .weather-period-name::before {
-    content: "▾";
+    content: "\25BE";
 }
 
 /* The hours sit just under the open row, indented to line up with the day name */
