@@ -16,7 +16,8 @@ body {
 }
 
 body {
-    height: 100vh;
+    min-height: 100vh;
+    background-attachment: fixed;
     padding: 1.5em;
     color: white;
     font-family: Arial, Helvetica, sans-serif;
@@ -46,26 +47,36 @@ body {
 
 /* ========== Layout ========== */
 
+/* Wide: three columns, with weather a little wider */
 main {
-    height: 100%;
-    display: flex;
-    justify-content: space-between;
-    gap: 1%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.25fr);
+    grid-template-areas: "sites moon weather";
+    gap: 2em;
 }
 
 .layout-col {
     display: flex;
     flex-direction: column;
-    width: 30%;
+    min-width: 0;
 }
 
 .left-col {
+    grid-area: sites;
     justify-content: space-between;
 }
 
 .mid-col {
+    grid-area: moon;
     justify-content: flex-start;
     gap: 1em;
+}
+
+.right-col {
+    grid-area: weather;
+    width: 100%;
+    max-width: 38rem;
+    justify-self: end;
 }
 
 .section-heading {
@@ -204,6 +215,10 @@ main {
     line-height: 1;
 }
 
+.moon-timeline-date {
+    white-space: nowrap;
+}
+
 .moon-timeline-phase.is-past {
     opacity: 0.6;
 }
@@ -218,7 +233,9 @@ main {
 
 #time-text {
     text-align: center;
-    font-size: 4.25rem;
+    /* 5% of the window's width, but never smaller than 2.5rem or bigger than 4.25rem */
+    font-size: clamp(2.5rem, 5vw, 4.25rem);
+    white-space: nowrap;
     margin-bottom: 0;
 }
 
@@ -356,7 +373,7 @@ main {
     flex-direction: column;
 }
 
-/* "Right Now" and "Next 6 Days" labels (font styles are in Base) */
+/* "Forecast" label (font styles are in Base) */
 #forecast-container h3 {
     margin: 1.5em 0 0.25em;
     padding-bottom: 0.4em;
@@ -366,10 +383,9 @@ main {
 /* Each row: name | icon | wind | temperatures */
 .weather-period-container {
     display: grid;
-    grid-template-columns: 9rem minmax(0, 1fr) 7em 6.5em;
+    grid-template-columns: minmax(8rem, 1fr) 7.5rem 7em 6.5em;
     gap: 0.75em;
     align-items: center;
-    gap: 1em;
     padding: 1.25em 0;
 }
 
@@ -400,7 +416,7 @@ main {
 .weather-wind {
     font-size: 0.9rem;
     opacity: 0.85;
-    text-align: right;
+    text-align: left;
     white-space: nowrap;
 }
 
@@ -504,15 +520,54 @@ main {
 }
 
 
-/* ========== Small screens ========== */
+/* ========== Smaller screens ========== */
 
-@media (max-width: 768px) {
+/* Medium: moon and clock top left, top sites under them, weather on the right */
+@media (max-width: 1300px) {
     main {
-        flex-direction: column;
-        height: auto;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+        grid-template-areas:
+            "moon  weather"
+            "sites weather";
     }
 
-    .layout-col {
-        width: 100%;
+    /* The big title takes up a lot of room for little benefit at this size */
+    .app-title {
+        display: none;
+    }
+}
+
+/* Narrow: one column: time, weather, moon, top sites */
+@media (max-width: 800px) {
+    main {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "time"
+            "weather"
+            "moon"
+            "sites";
+    }
+
+    /* Let the clock and the moon be placed separately */
+    .mid-col {
+        display: contents;
+    }
+
+    .time-container {
+        grid-area: time;
+    }
+
+    /* The clock has the full width here, so let it be bigger */
+    #time-text {
+        font-size: clamp(3rem, 13vw, 5rem);
+    }
+
+    /* Center the weather in the single column */
+    .right-col {
+        justify-self: center;
+    }
+
+    #moon-section {
+        grid-area: moon;
     }
 }
