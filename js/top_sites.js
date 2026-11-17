@@ -67,7 +67,7 @@ function getFaviconUrl(pageUrl) {
     // The demo can't use the extension's favicon service, so it uses Google's instead
     if (!isExtension) {
         const host = new URL(pageUrl).host
-        return `https://www.google.com/s2/favicons?domain=${host}&sz=32`
+        return `https://icons.duckduckgo.com/ip3/${host}.ico`
     }
 
     const url = new URL(chrome.runtime.getURL("/_favicon/"))
