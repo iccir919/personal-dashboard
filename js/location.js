@@ -70,6 +70,7 @@ async function getZipCodeProperties(zipCode) {
 }
 
 function showLocation(location) {
+    document.body.classList.remove("needs-location")
     document.getElementById("zip-code-form").hidden = true
     document.getElementById("location-row").hidden = false
     document.getElementById("current-location-heading").textContent = "Location"

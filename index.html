@@ -5,7 +5,7 @@
         <link rel="stylesheet" href="index.css">
         <title>Personal Dashboard</title>
     </head>
-    <body>
+    <body class="needs-location">
         <main>
             <!-- Left: title and top sites -->
             <div class="layout-col left-col">
@@ -44,6 +44,7 @@
 
                 <section class="current-location-section">
                     <h2 id="current-location-heading" class="location-label">Enter your ZIP code</h2>
+                    <p class="location-intro">Add your ZIP code to see your local forecast, sunrise and sunset, and tonight's moon.</p>
                     <div id="location-row" class="location-row" hidden>
                         <div id="location-switcher" class="location-switcher"></div>
                         <button type="button" id="change-location-btn" class="text-button">+ Add</button>

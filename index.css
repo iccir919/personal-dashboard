@@ -571,3 +571,47 @@ main {
         grid-area: moon;
     }
 }
+
+/* ========== First visit (no location saved yet) ========== */
+
+/* The intro line only shows before a location is saved */
+.location-intro {
+    display: none;
+    margin: 0 0 0.5em;
+    max-width: 22em;
+    line-height: 1.4;
+}
+
+.needs-location .location-intro {
+    display: block;
+}
+
+/* A bigger, friendlier form */
+.needs-location .zip-form input {
+    width: 9em;
+    font-size: 1.25rem;
+    padding: 0.5em 0.75em;
+}
+
+.needs-location .zip-form button[type="submit"] {
+    padding: 0.55em 1.25em;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: hsl(250, 40%, 25%);
+    background: white;
+    border-radius: 6px;
+    text-decoration: none;
+    text-shadow: none;
+}
+
+/* Wide screens: fill the window so the clock and the welcome sit in the middle */
+@media (min-width: 1301px) {
+    .needs-location main {
+        min-height: calc(100vh - 3em);
+    }
+
+    .needs-location .mid-col,
+    .needs-location .right-col {
+        justify-content: center;
+    }
+}
