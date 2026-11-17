@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Personal Dashboard",
-    "version": "1.0.0",
-    "description": "Just for practicing async JS",
+    "version": "1.1.0",
+    "description": "A new tab page with your local weather, moon phases, a live clock, and your most visited sites.",
     "action": {
         "default_icon": "icon.png"
     },
