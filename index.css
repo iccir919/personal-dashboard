@@ -50,7 +50,7 @@ body {
 /* Wide: three columns, with weather a little wider */
 main {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.25fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
     grid-template-areas: "sites moon weather";
     gap: 2em;
 }
@@ -75,7 +75,7 @@ main {
 .right-col {
     grid-area: weather;
     width: 100%;
-    max-width: 38rem;
+    max-width: 32rem;
     justify-self: end;
 }
 
@@ -196,22 +196,21 @@ main {
 
 .moon-timeline {
     display: flex;
-    justify-content: space-between;
-    gap: 0.75em;
-    width: 100%;
+    justify-content: center;
+    gap: 1.25em;
     margin: 0.5em 0;
 }
 
 .moon-timeline-phase {
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     align-items: center;
     gap: 0.25em;
     font-size: 0.85rem;
 }
 
 .moon-timeline-emoji {
-    font-size: 1.75rem;
+    font-size: 1.25em;
     line-height: 1;
 }
 
@@ -383,7 +382,7 @@ main {
 /* Each row: name | icon | wind | temperatures */
 .weather-period-container {
     display: grid;
-    grid-template-columns: minmax(8rem, 1fr) 7.5rem 7em 6.5em;
+    grid-template-columns: 8.5rem minmax(7.5rem, 1fr) minmax(6.5em, 1fr) 6em;    
     gap: 0.75em;
     align-items: center;
     padding: 1.25em 0;
