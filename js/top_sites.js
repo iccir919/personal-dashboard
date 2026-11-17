@@ -1,17 +1,32 @@
 import { saveToCache, loadFromCache } from "./cache.js"
 // Most frequently visited websites
 
+// Shown on the live demo, where a web page can't read browsing history
+const DEMO_HISTORY = [
+    { url: "https://github.com/iccir919", title: "GitHub", visitCount: 42 },
+    { url: "https://developer.mozilla.org/en-US/", title: "MDN Web Docs", visitCount: 35 },
+    { url: "https://scrimba.com/", title: "Scrimba", visitCount: 28 },
+    { url: "https://stackoverflow.com/", title: "Stack Overflow", visitCount: 21 },
+    { url: "https://www.youtube.com/", title: "YouTube", visitCount: 18 },
+    { url: "https://news.ycombinator.com/", title: "Hacker News", visitCount: 12 },
+    { url: "https://www.weather.gov/", title: "National Weather Service", visitCount: 9 },
+    { url: "https://en.wikipedia.org/", title: "Wikipedia", visitCount: 7 }
+]
+
+// True inside the extension, false on a normal web page
+const isExtension = Boolean(globalThis.chrome?.history)
+
 export function getBrowsingHistory() {
-    if ( !chrome.history ) {
-        document.getElementById("most-frequent-websites-section").style.display = "none"
+    if (!isExtension) {
+        getMostVisitedSites(DEMO_HISTORY)
         return
-    } 
+    }
 
     const today = new Date()
-    const sevenDaysAgo = new Date();
+    const sevenDaysAgo = new Date()
     sevenDaysAgo.setDate(today.getDate() - 7)
 
-    chrome.history.search({ text: "",  maxResults: 500, startTime: sevenDaysAgo.getTime() }, getMostVisitedSites)
+    chrome.history.search({ text: "", maxResults: 500, startTime: sevenDaysAgo.getTime() }, getMostVisitedSites)
 }
 
 function getMostVisitedSites(history) {
@@ -26,7 +41,6 @@ function getMostVisitedSites(history) {
 
         // host includes the port, so localhost:3000 and localhost:5173 stay separate
         const site = url.host
-        console.log(url)
         if (hiddenSites.includes(site)) return
 
         // First time seeing this site: start its entry
@@ -50,6 +64,12 @@ function getMostVisitedSites(history) {
 }
 
 function getFaviconUrl(pageUrl) {
+    // The demo can't use the extension's favicon service, so it uses Google's instead
+    if (!isExtension) {
+        const host = new URL(pageUrl).host
+        return `https://www.google.com/s2/favicons?domain=${host}&sz=32`
+    }
+
     const url = new URL(chrome.runtime.getURL("/_favicon/"))
     url.searchParams.set("pageUrl", pageUrl)
     url.searchParams.set("size", "32")
