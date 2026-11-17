@@ -47,7 +47,7 @@ body {
 
 /* ========== Layout ========== */
 
-/* Wide: three columns, with weather a little wider */
+/* Wide: three columns; weather never narrower than 30rem */
 main {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(30rem, 1fr);
@@ -106,7 +106,7 @@ main {
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
-    max-width: 100%;
+    max-width: calc(100% - 2.5em);
     vertical-align: middle;
 }
 
@@ -607,7 +607,7 @@ main {
 /* Wide screens: fill the window so the clock and the welcome sit in the middle */
 @media (min-width: 1301px) {
     .needs-location main {
-        min-height: calc(100vh - 3em);
+        min-height: calc(100vh - 4em);
     }
 
     .needs-location .mid-col,
