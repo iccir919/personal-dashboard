@@ -18,7 +18,7 @@ body {
 body {
     min-height: 100vh;
     background-attachment: fixed;
-    padding: 1.5em;
+    padding: 2em 2.5em;
     color: white;
     font-family: Arial, Helvetica, sans-serif;
     text-shadow: 0 0 20px #242424;
@@ -50,9 +50,9 @@ body {
 /* Wide: three columns, with weather a little wider */
 main {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(30rem, 1fr);
     grid-template-areas: "sites moon weather";
-    gap: 2em;
+    gap: 2em 4em;
 }
 
 .layout-col {
@@ -97,6 +97,7 @@ main {
 .frequent-website-list-item {
     margin: 0.75em 0;
     font-size: 1rem;
+    white-space: nowrap;
 }
 
 .frequent-website-link {
