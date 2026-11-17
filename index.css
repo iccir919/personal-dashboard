@@ -88,7 +88,8 @@ main {
 
 .app-title {
     margin-top: 0.25em;
-    font-size: 2.75rem;
+    font-size: clamp(1.75rem, 2.2vw, 2.75rem);
+    white-space: nowrap;
 }
 
 
