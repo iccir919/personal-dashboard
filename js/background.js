@@ -10,8 +10,15 @@ const TIME_OF_DAY_COLORS = {
     night: { hues: [200, 300], lightness: 22 }   // deep blues, indigo, purples
 }
 
+// Remember which time of day is showing, so we only repaint when it changes
+let currentTimeOfDay = null
+
 export function getRandomBackground() {
-    document.body.style.backgroundImage = generateGradient(getTimeOfDay())
+    const timeOfDay = getTimeOfDay()
+    if (timeOfDay === currentTimeOfDay) return
+
+    currentTimeOfDay = timeOfDay
+    document.body.style.backgroundImage = generateGradient(timeOfDay)
 }
 
 function getTimeOfDay() {
