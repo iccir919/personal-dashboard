@@ -387,7 +387,7 @@ main {
     grid-template-columns: 8.5rem minmax(7.5rem, 1fr) minmax(6.5em, 1fr) 6em;    
     gap: 0.75em;
     align-items: center;
-    padding: 1.25em 0;
+    padding: 0.85em 0;
 }
 
 .weather-period-name {
@@ -480,6 +480,24 @@ main {
 .day-row summary {
     list-style: none;
     cursor: pointer;
+}
+
+/* The written forecast, shown when a day is open */
+.day-summary {
+    margin: 0 0 1.25em 1em;
+    max-width: 34em;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    opacity: 0.85;
+    white-space: pre-line;
+}
+
+/* The open day sits on a soft panel, so it stands apart from the others */
+.day-row[open] {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 0 0.75em 0.75em;
+    margin: 0.5em -0.75em;
 }
 
 /* When a day is open, its hours already show the weather, so hide the day's own emoji */

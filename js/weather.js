@@ -100,21 +100,22 @@ function render7DayWeatherForecast(forecast) {
 
     function renderDayRow({ day, night }, isToday) {
         const low = night ? ` / ${night.temperature}°` : ""
-        const details = night
-            ? `${day.name}: ${day.detailedForecast}\n\n${night.name}: ${night.detailedForecast}`
-            : day.detailedForecast
+        const details = day.detailedForecast
 
+                // Use the weekday, since the weather service sometimes says "Thanksgiving Day" instead of "Thursday"
+        const name = isToday ? day.name : new Date(day.startTime).toLocaleDateString("en-US", { weekday: "long" })
         // <details> opens and closes when its <summary> is clicked.
         // Sharing a name means only one can be open at a time. Today starts open.
         return `
             <details class="day-row" name="forecast-days" ${isToday ? "open" : ""}>
-                <summary class="weather-period-container" title="${toTitle(details)}">
-                    <h4 class="weather-period-name">${day.name}</h4>
+                <summary class="weather-period-container">
+                    <h4 class="weather-period-name">${name}</h4>
                     ${renderIcon(day)}
                     <span class="weather-wind">${getWind(day)}</span>
                     <p class="weather-period-temperature-text">${day.temperature}°${low}</p>
                 </summary>
                 <div class="hourly-strip" data-today="${isToday}" data-day-start="${day.startTime}"></div>
+                <p class="day-summary">${details}</p>
             </details>
         `
     }
@@ -126,11 +127,6 @@ function render7DayWeatherForecast(forecast) {
         const chanceText = isWet && chance ? `<span class="weather-rain-chance">${chance}%</span>` : ""
 
         return `<span class="weather-period-icon">${emoji}${chanceText}</span>`
-    }
-
-    function toTitle(text) {
-        // A " inside the text would end the title="..." early, so swap it for the HTML-safe version
-        return text.replaceAll('"', "&quot;")
     }
 
     function getWind(period) {
